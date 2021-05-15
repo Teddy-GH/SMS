@@ -1,0 +1,8 @@
+<tps-community-form
+  (OnSubmit)="onFormSubmitted($event)"
+  [zipcode]="zipcode$ | async"
+  [imagesList]="images$ | async"
+  [loading]="loading$ | async"
+  (OnCategoryAdded)="onCategoryAdded($event)"
+  [categoryList]="categories$ | async"
+></tps-community-form>

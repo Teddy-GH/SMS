@@ -1,0 +1,616 @@
+<div class="flex flex-col w-full mx-auto px-4 pt-3 relative z-0">
+  <nz-spin [nzSpinning]="loading">
+    <nz-card class="card-1 w-full rounded-md">
+      <form nz-form [formGroup]="communityForm" (ngSubmit)="submitForm()" class="flex-grow max-w-2xl" nzLayout="vertical">
+        <div class="flex">
+          <div class="w-3/4">
+            <div class="form-title" *ngIf="!selectedCommunityForEdit">
+              Add Community
+            </div>
+            <div class="form-title" *ngIf="selectedCommunityForEdit">
+              Update community
+            </div>
+            <div class="form-subtitle">
+              Update community from existing locations
+            </div>
+          </div>
+
+          <div class="w-1/4 flex justify-end" *ngIf="!selectedCommunityForEdit">
+            <button class="form-btn-1 w-full md:w-auto mt-6 md:mt-0 h-10" nz-button *ngxPermissionsOnly="[appRoles.ROLE_CREATE_COMMUNITY]">
+              Create community
+            </button>
+          </div>
+          <div class="w-1/4 flex justify-end" *ngIf="selectedCommunityForEdit">
+            <button class="form-btn-1 w-full md:w-auto mt-6 md:mt-0 h-10" nz-button *ngxPermissionsOnly="[appRoles.ROLE_EDIT_COMMUNITY]">
+              Update community
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <div class="flex justify-between" style="border-bottom: 0.5px solid #c7c7c7;">
+            <div class="mb-1 font-bold text-black">
+              Community type
+            </div>
+          </div>
+
+          <div class="w-3/5 mt-5" style="position: relative; z-index: 999;">
+            <nz-form-item>
+              <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="type" style="padding-bottom: 0px;">Type</nz-form-label>
+              <nz-form-control [nzSm]="14" [nzXs]="24">
+                <nz-select
+                  [nzDisabled]="selectedCommunityForEdit"
+                  nzPlaceHolder=""
+                  id="type"
+                  formControlName="type"
+                  class="lst"
+                  nzDropdownClassName="main-selector"
+                  [(ngModel)]="commType"
+                >
+                  <nz-option nzLabel="Location-based community" nzValue="1"></nz-option>
+                  <nz-option nzLabel="Non-location based community" nzValue="0"></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+        <ng-container *ngIf="commType == '1'">
+          <div class="mt-6">
+            <div class="flex justify-between" style="border-bottom: 0.5px solid #c7c7c7;">
+              <div class="mb-1 font-bold text-black">
+                Location-based community details
+              </div>
+            </div>
+
+            <div class="w-3/5 mt-5">
+              <nz-form-item>
+                <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="zipcode" style="padding-bottom: 0px;">Location zipcode</nz-form-label>
+                <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Please select zipcode">
+                  <nz-select nzShowSearch nzAllowClear nzPlaceHolder="Select location" id="zipcode" formControlName="zipcode" class="lst">
+                    <nz-option
+                      *ngFor="let zipcode of zipcode | keyvalue; trackBy: identifyZipcode"
+                      [nzLabel]="zipcode.value"
+                      [nzValue]="zipcode.key"
+                    ></nz-option>
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="commType == '0'">
+          <div class="mt-6">
+            <div class="flex justify-between mb-1" style="border-bottom: 0.5px solid #c7c7c7;">
+              <div class="font-bold text-black">
+                Non-location based community
+              </div>
+            </div>
+
+            <div class="w-3/5 mt-5">
+              <nz-form-item>
+                <nz-form-label nzFor="name" style="padding-bottom: 0px;">Community name</nz-form-label>
+                <nz-form-control [nzErrorTip]="communityNameError">
+                  <input nz-input maxlength="51" class="input-fld" formControlName="name" placeholder="Community name" />
+                  <span
+                    class="w-full"
+                    *ngIf="
+                      communityForm.controls['name'].value !== '' &&
+                      communityForm.controls.name.value?.length >= 0 &&
+                      communityForm.controls.name.value?.length < 50
+                    "
+                    >{{ 50 - communityForm.controls.name.value?.length }} characters left</span
+                  >
+                  <ng-template #communityNameError let-control>
+                    <ng-container *ngIf="control.hasError('required')">
+                      Please input community name
+                    </ng-container>
+                    <ng-container *ngIf="control.hasError('maxInputLength')">
+                      No more than 50 characters allowed
+                    </ng-container>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+
+            <div class="flex justify-start">
+              <div class="w-2/5 mt-5">
+                <nz-form-item>
+                  <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="category" style="padding-bottom: 0px;">Categories</nz-form-label>
+                  <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Please select category">
+                    <nz-select
+                      nzShowSearch
+                      nzAllowClear
+                      [nzNotFoundContent]="renderTemplate"
+                      nzPlaceHolder="Select category"
+                      id="category"
+                      formControlName="category"
+                      class="lst"
+                      nzDropdownClassName="category-selector"
+                      (keyup)="(0)"
+                      (input)="customCategory($event)"
+                    >
+                      <nz-option
+                        nzCustomContent
+                        *ngFor="let item of categoryList; let i = index; trackBy: identifyCategories"
+                        [nzLabel]="item.name"
+                        [nzValue]="item.id"
+                      >
+                        <div class="content pb-2">
+                          <label
+                            nz-checkbox
+                            [ngModel]="checkedCategory[item.id]"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="onCategorySelected(item)"
+                            [nzValue]="item.id"
+                            [nzDisabled]="isListFull"
+                            (click)="stackFull()"
+                            >{{ item.name }}</label
+                          >
+                        </div>
+                      </nz-option>
+
+                      <nz-option nzCustomContent (click)="onEvent($event)">
+                        <div class="flex items-center cursor-pointer" (click)="addNewCategory()">
+                          <div class="add-icon">
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path
+                                d="M9.66634 5.66683H5.66634V9.66683H4.33301V5.66683H0.333008V4.3335H4.33301V0.333496H5.66634V4.3335H9.66634V5.66683Z"
+                                fill="black"
+                                fill-opacity="0.54"
+                              />
+                            </svg>
+                          </div>
+                          <div class="add-category pl-3">Add new category</div>
+                        </div>
+                      </nz-option>
+                    </nz-select>
+                    <ng-template #renderTemplate>
+                      <div class="flex items-center ml-6 cursor-pointer" (click)="addNewCategory()">
+                        <div class="add-icon">
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                              d="M9.66634 5.66683H5.66634V9.66683H4.33301V5.66683H0.333008V4.3335H4.33301V0.333496H5.66634V4.3335H9.66634V5.66683Z"
+                              fill="black"
+                              fill-opacity="0.54"
+                            />
+                          </svg>
+                        </div>
+                        <div class="add-category pl-3">Add new category</div>
+                      </div>
+                    </ng-template>
+                  </nz-form-control>
+                </nz-form-item>
+                <span class="helper-text">3 categories max</span>
+              </div>
+
+              <div class="w-3/5 ml-6 mt-5">
+                <nz-form-item>
+                  <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="name" style="padding-bottom: 0px;"
+                    >Selected Categories ({{ listOfCategories.size }})</nz-form-label
+                  >
+                  <div class="flex flex-wrap max-w-full" *ngIf="listOfCategories?.size > 0; else placeHolder">
+                    <nz-tag
+                      *ngFor="let category of listOfCategories; trackBy: identifyListOfCategories"
+                      class="tag-prop mt-2"
+                      nzMode="closeable"
+                      (nzOnClose)="onClose(category)"
+                    >
+                      {{ category.name }}
+                    </nz-tag>
+                  </div>
+                  <ng-template #placeHolder>No category selected</ng-template>
+                </nz-form-item>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <div class="mt-6">
+          <div class="fld-title" style="color: #303030;">
+            Community image
+          </div>
+          <div class="">
+            <nz-form-item class="flex w-full">
+              <div class="img-wrap w-full">
+                <img
+                  height="116px"
+                  width="705px"
+                  [src]="imageUrl"
+                  class="image"
+                  formControlName="image"
+                  alt=""
+                  *ngIf="imageUrl"
+                  [class.disable-pointer]="imageUrl"
+                  ngDefaultControl
+                />
+              </div>
+
+              <div class="w-full">
+                <div class="flex justify-center img cursor-pointer" *ngIf="!imageUrl" (click)="uploadImage()">
+                  <div class="upload-icon pt-6">
+                    <div class="ss ml-3 inline-block align-middle text-center">
+                      <svg width="37" height="36" viewBox="0 0 37 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M32.5 0H4.5C2.3 0 0.5 1.8 0.5 4V32C0.5 34.2 2.3 36 4.5 36H32.5C34.7 36 36.5 34.2 36.5 32V4C36.5 1.8 34.7 0 32.5 0ZM32.5 4V32H4.5V4H32.5ZM16.78 25.46L22.78 17.72L30.5 28H6.5L12.5 20.28L16.78 25.46Z"
+                          fill="black"
+                          fill-opacity="0.54"
+                        />
+                      </svg>
+                    </div>
+                    <div class="pt-2">Add image</div>
+                  </div>
+                </div>
+              </div>
+            </nz-form-item>
+            <div class="flex justify-between mt-1 fld-title">
+              <span id="replace-image" *ngIf="imageUrl" class="cursor-pointer" style="color: #387f8a;" (click)="uploadImage()"
+                >Replace image</span
+              >
+              <span id="replace-image" *ngIf="imageUrl" class="cursor-pointer" style="color: #820014;" (click)="confirmDeletion()"
+                >Remove image</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="my-6">
+          <div class="fld-title" style="color: #303030;">
+            Description
+          </div>
+
+          <div class="">
+            <nz-form-item>
+              <nz-form-control [nzErrorTip]="DescriptionError">
+                <textarea
+                  class="form-description text-gray-600"
+                  formControlName="description"
+                  nz-input
+                  placeholder="Location description"
+                  style="margin-top: 2px;"
+                  maxlength="256"
+                ></textarea>
+                <span
+                  *ngIf="
+                    communityForm.controls.description.value != undefined &&
+                    communityForm.controls['description'].value !== '' &&
+                    communityForm.controls.description.value?.length >= 0 &&
+                    communityForm.controls.description.value?.length < 255
+                  "
+                  >{{ 255 - communityForm.controls.description.value?.length }} characters left</span
+                >
+                <ng-template #DescriptionError let-control>
+                  <ng-container *ngIf="control.hasError('maxLength')">
+                    No more than 255 characters allowed
+                  </ng-container>
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </form>
+    </nz-card>
+  </nz-spin>
+</div>
+
+<nz-modal
+  id="upload-image-modal"
+  class="main-modal h-full"
+  [nzMaskClosable]="false"
+  [nzFooter]="null"
+  nzWrapClassName="vertical-center-modal upload-modal"
+  [nzWidth]="712"
+  [(nzVisible)]="isUploadVisible"
+  nzTitle="Select or Upload image"
+  (nzOnCancel)="handleCancel()"
+>
+  <div nz-row>
+    <nz-tabset [(nzSelectedIndex)]="tabIndex" class="tab-container">
+      <nz-tab
+        class="ant-upload-text"
+        nzTitle="Uploaded images"
+        (nzSelect)="getTabSet(0)"
+        (nzDeselect)="getTabSet(0)"
+        (nzClick)="getTabSet(0)"
+      >
+        <div class="img-row" *ngIf="images">
+          <div nz-row nzGutter="16 16">
+            <div
+              nz-col
+              class="flex ant-col-6 md:ant-col-6"
+              *ngFor="let image of imagesList | unique; let i = index; trackBy: identifyListOfImages"
+            >
+              <div class="grid-config my-2 mx-2" style="height: '90px'; width: '165px';">
+                <img
+                  class="image-fit-div"
+                  style="cursor: pointer; border-radius: 8px; height: 105px;"
+                  src="{{ imageSrc }}{{ image }}"
+                  (click)="addUploadedImage(image, i)"
+                  alt="community-image"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </nz-tab>
+      <nz-tab class="ant-upload-text" nzTitle="Upload image" (nzSelect)="getTabSet(1)" (nzDeselect)="getTabSet(1)" (nzClick)="getTabSet(1)">
+        <!-- image upload (and cropper) -->
+        <div class="p-6">
+          <input type="file" #file style="display: none;" [attr.accept]="accept" [multiple]="multiple" (change)="fileChangeEvent($event)" />
+
+          <div class="">
+            <div
+              *ngIf="!imageChangedEvent"
+              class="min-h-200 h-full border border-dashed border-gray-500 flex justify-center items-center cursor-pointer"
+              (click)="addFile()"
+            >
+              <div>
+                <div class="flex justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    aria-hidden="true"
+                    focusable="false"
+                    width="6em"
+                    height="6em"
+                    style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);"
+                    preserveAspectRatio="xMidYMid meet"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M13 19v-4h3l-4-5l-4 5h3v4z" fill="#dedede" />
+                    <path
+                      d="M7 19h2v-2H7c-1.654 0-3-1.346-3-3c0-1.404 1.199-2.756 2.673-3.015l.581-.102l.192-.558C8.149 8.274 9.895 7 12 7c2.757 0 5 2.243 5 5v1h1c1.103 0 2 .897 2 2s-.897 2-2 2h-3v2h3c2.206 0 4-1.794 4-4a4.01 4.01 0 0 0-3.056-3.888C18.507 7.67 15.56 5 12 5C9.244 5 6.85 6.611 5.757 9.15C3.609 9.792 2 11.82 2 14c0 2.757 2.243 5 5 5z"
+                      fill="#dedede"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  Choose an image
+                  <!-- or drag it here -->
+                </div>
+              </div>
+            </div>
+
+            <ng-container *ngIf="imageChangedEvent">
+              <div class="flex justify-center">
+                <image-cropper
+                  [imageChangedEvent]="imageChangedEvent"
+                  [maintainAspectRatio]="false"
+                  [containWithinAspectRatio]="containWithinAspectRatio"
+                  [resizeToWidth]="resizeToWidth"
+                  [resizeToHeight]="resizeToHeight"
+                  [cropperMinWidth]="cropperMinWidth"
+                  [cropperMinHeight]="cropperMinHeight"
+                  [onlyScaleDown]="true"
+                  [roundCropper]="false"
+                  [canvasRotation]="canvasRotation"
+                  [transform]="transform"
+                  [alignImage]="'center'"
+                  [style.display]="showCropper ? null : 'none'"
+                  format="png"
+                  (imageCropped)="imageCropped($event)"
+                  (imageLoaded)="imageLoaded()"
+                  (loadImageFailed)="loadImageFailed()"
+                ></image-cropper>
+              </div>
+
+              <div class="flex space-x-2 justify-center mt-3">
+                <button class="icon-btn" (click)="rotateLeft()" nzTooltipTitle="Rotate Left" nzTooltipPlacement="bottom" nz-tooltip>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    aria-hidden="true"
+                    focusable="false"
+                    width="24px"
+                    height="24px"
+                    style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);"
+                    preserveAspectRatio="xMidYMid meet"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M7.11 8.53L5.7 7.11C4.8 8.27 4.24 9.61 4.07 11h2.02c.14-.87.49-1.72 1.02-2.47zM6.09 13H4.07c.17 1.39.72 2.73 1.62 3.89l1.41-1.42c-.52-.75-.87-1.59-1.01-2.47zm1.01 5.32c1.16.9 2.51 1.44 3.9 1.61V17.9c-.87-.15-1.71-.49-2.46-1.03L7.1 18.32zM13 4.07V1L8.45 5.55L13 10V6.09c2.84.48 5 2.94 5 5.91s-2.16 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93s-3.05-7.44-7-7.93z"
+                      fill="#626262"
+                    />
+                  </svg>
+                </button>
+                <button class="icon-btn" (click)="rotateRight()" nzTooltipTitle="Rotate Right" nzTooltipPlacement="bottom" nz-tooltip>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    aria-hidden="true"
+                    focusable="false"
+                    width="24px"
+                    height="24px"
+                    style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);"
+                    preserveAspectRatio="xMidYMid meet"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M15.55 5.55L11 1v3.07C7.06 4.56 4 7.92 4 12s3.05 7.44 7 7.93v-2.02c-2.84-.48-5-2.94-5-5.91s2.16-5.43 5-5.91V10l4.55-4.45zM19.93 11a7.906 7.906 0 0 0-1.62-3.89l-1.42 1.42c.54.75.88 1.6 1.02 2.47h2.02zM13 17.9v2.02c1.39-.17 2.74-.71 3.9-1.61l-1.44-1.44c-.75.54-1.59.89-2.46 1.03zm3.89-2.42l1.42 1.41c.9-1.16 1.45-2.5 1.62-3.89h-2.02c-.14.87-.48 1.72-1.02 2.48z"
+                      fill="#626262"
+                    />
+                  </svg>
+                </button>
+
+                <button class="icon-btn" (click)="zoomIn()" nzTooltipTitle="Zoom In" nzTooltipPlacement="bottom" nz-tooltip>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    aria-hidden="true"
+                    focusable="false"
+                    width="24px"
+                    height="24px"
+                    style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);"
+                    preserveAspectRatio="xMidYMid meet"
+                    viewBox="0 0 512 512"
+                  >
+                    <path fill="#626262" d="M208 96h-32v80H96v32h80v80h32v-80h80v-32h-80V96z" />
+                    <path
+                      fill="#626262"
+                      d="M479.6 400.4l-81.084-81.084l-62.368-25.767A175.008 175.008 0 0 0 368 192.687c0-97.047-78.953-176-176-176s-176 78.953-176 176s78.953 176 176 176a175.028 175.028 0 0 0 101.619-32.378l25.7 62.2L400.4 479.6a56 56 0 0 0 79.2-79.2zM48 192.687c0-79.4 64.6-144 144-144s144 64.6 144 144s-64.6 144-144 144s-144-64.599-144-144zm408.971 264.284a24.029 24.029 0 0 1-33.942 0L346.457 380.4l-23.894-57.835l57.837 23.892l76.573 76.572a24.029 24.029 0 0 1-.002 33.942z"
+                    />
+                  </svg>
+                </button>
+                <button class="icon-btn" (click)="zoomOut()" nzTooltipTitle="Zoom Out" nzTooltipPlacement="bottom" nz-tooltip>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    aria-hidden="true"
+                    focusable="false"
+                    width="24px"
+                    height="24px"
+                    style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);"
+                    preserveAspectRatio="xMidYMid meet"
+                    viewBox="0 0 512 512"
+                  >
+                    <path fill="#626262" d="M96.344 175.313h192v32h-192z" />
+                    <path
+                      fill="#626262"
+                      d="M479.6 399.716l-81.084-81.084l-62.368-25.767A175.014 175.014 0 0 0 368 192c0-97.047-78.953-176-176-176S16 94.953 16 192s78.953 176 176 176a175.034 175.034 0 0 0 101.619-32.377l25.7 62.2l81.081 81.088a56 56 0 1 0 79.2-79.195zM48 192c0-79.4 64.6-144 144-144s144 64.6 144 144s-64.6 144-144 144S48 271.4 48 192zm408.971 264.284a24.028 24.028 0 0 1-33.942 0l-76.572-76.572l-23.894-57.835l57.837 23.894l76.573 76.572a24.028 24.028 0 0 1-.002 33.941z"
+                    />
+                  </svg>
+                </button>
+                <button class="icon-btn" (click)="flipHorizontal()" nzTooltipTitle="Flip Horizontal" nzTooltipPlacement="bottom" nz-tooltip>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    aria-hidden="true"
+                    focusable="false"
+                    width="24px"
+                    height="24px"
+                    style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);"
+                    preserveAspectRatio="xMidYMid meet"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M15 21h2v-2h-2m4-10h2V7h-2M3 5v14c0 1.1.9 2 2 2h4v-2H5V5h4V3H5c-1.1 0-2 .9-2 2m16-2v2h2c0-1.1-.9-2-2-2m-8 20h2V1h-2m8 16h2v-2h-2M15 5h2V3h-2m4 10h2v-2h-2m0 10c1.1 0 2-.9 2-2h-2z"
+                      fill="#626262"
+                    />
+                  </svg>
+                </button>
+                <button class="icon-btn" (click)="flipVertical()" nzTooltipTitle="Flip Vertical" nzTooltipPlacement="bottom" nz-tooltip>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    aria-hidden="true"
+                    focusable="false"
+                    width="24px"
+                    height="24px"
+                    style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);"
+                    preserveAspectRatio="xMidYMid meet"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M3 15v2h2v-2m10 4v2h2v-2m2-16H5c-1.1 0-2 .9-2 2v4h2V5h14v4h2V5c0-1.1-.9-2-2-2m2 16h-2v2c1.1 0 2-.9 2-2M1 11v2h22v-2M7 19v2h2v-2m10-4v2h2v-2m-10 4v2h2v-2M3 19c0 1.1.9 2 2 2v-2z"
+                      fill="#626262"
+                    />
+                  </svg>
+                </button>
+                <button class="icon-btn" (click)="resetImage()" nzTooltipTitle="Reset Image" nzTooltipPlacement="bottom" nz-tooltip>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    aria-hidden="true"
+                    focusable="false"
+                    width="24px"
+                    height="24px"
+                    style="-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);"
+                    preserveAspectRatio="xMidYMid meet"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 16c1.671 0 3-1.331 3-3s-1.329-3-3-3s-3 1.331-3 3s1.329 3 3 3z" fill="#FF0000" />
+                    <path
+                      d="M20.817 11.186a8.94 8.94 0 0 0-1.355-3.219a9.053 9.053 0 0 0-2.43-2.43a8.95 8.95 0 0 0-3.219-1.355a9.028 9.028 0 0 0-1.838-.18V2L8 5l3.975 3V6.002c.484-.002.968.044 1.435.14a6.961 6.961 0 0 1 2.502 1.053a7.005 7.005 0 0 1 1.892 1.892A6.967 6.967 0 0 1 19 13a7.032 7.032 0 0 1-.55 2.725a7.11 7.11 0 0 1-.644 1.188a7.2 7.2 0 0 1-.858 1.039a7.028 7.028 0 0 1-3.536 1.907a7.13 7.13 0 0 1-2.822 0a6.961 6.961 0 0 1-2.503-1.054a7.002 7.002 0 0 1-1.89-1.89A6.996 6.996 0 0 1 5 13H3a9.02 9.02 0 0 0 1.539 5.034a9.096 9.096 0 0 0 2.428 2.428A8.95 8.95 0 0 0 12 22a9.09 9.09 0 0 0 1.814-.183a9.014 9.014 0 0 0 3.218-1.355a8.886 8.886 0 0 0 1.331-1.099a9.228 9.228 0 0 0 1.1-1.332A8.952 8.952 0 0 0 21 13a9.09 9.09 0 0 0-.183-1.814z"
+                      fill="#FF0000"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </ng-container>
+            <div class="change" *ngIf="imageChangedEvent" (click)="addFile()">
+              Upload new
+            </div>
+            <!-- <img class="my-3" [src]="croppedImage" alt="" [style.border]="croppedImage ? '1px solid black' : 'none'" /> -->
+          </div>
+        </div>
+      </nz-tab>
+    </nz-tabset>
+
+    <div class="flex justify-between w-full m-6">
+      <div class="flex w-2/3">
+        <div class="flex flex-col">
+          <div class="message-image-size text-grey-darker bg-grey-light">
+            {{ tabIndex === 1 ? 'Recommended image dimensions: 705 (width) x 116 (height)' : '' }}
+          </div>
+          <div *ngIf="tabIndex === 1" class="message-image-size text-grey-darker bg-grey-light">
+            Accepted formats: .jpg or .png
+          </div>
+        </div>
+      </div>
+
+      <div class="flex mx-auto md:mx-0">
+        <button nz-button class="btn-action btn-add-image btn-outline mr-1" (click)="handleCancel()">
+          Cancel
+        </button>
+
+        <button nz-button class="form-btn-1" style="width: 120px;" (click)="addImage()" [disabled]="!hasImage" [nzLoading]="loading">
+          Add image
+        </button>
+      </div>
+    </div>
+  </div>
+</nz-modal>
+
+<nz-modal
+  nzWrapClassName="vertical-center-modal add-category-modal"
+  [nzMaskClosable]="false"
+  [nzFooter]="null"
+  [nzWidth]="500"
+  [(nzVisible)]="isVisibleMiddle"
+  nzTitle="Add new category"
+  (nzOnCancel)="handleCancelAddCategory()"
+>
+  <form nz-form [formGroup]="addCategoryForm" class="flex-grow max-w-2xl" nzLayout="vertical">
+    <div class="modal-body">
+      <div class="lbl pt-4">
+        Add a new category. Categories are visible to everyone.
+      </div>
+
+      <div class="mt-2">
+        <nz-form-item>
+          <nz-form-control [nzErrorTip]="addCategoryItemError">
+            <nz-input-group>
+              <input
+                nz-input
+                class="input-cat"
+                id="name"
+                maxlength="51"
+                formControlName="name"
+                placeholder="Add category"
+                [ngModel]="customCategoryName"
+              />
+              <ng-template #addCategoryItemError let-control>
+                <ng-container *ngIf="control.hasError('required')">
+                  Please input category name
+                </ng-container>
+                <ng-container *ngIf="control.hasError('maxInputLength')">
+                  No more than 50 characters allowed
+                </ng-container>
+              </ng-template>
+            </nz-input-group>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+    <div *nzModalFooter>
+      <span class="btn-cancel self-center cursor-pointer" (click)="handleCancelAddCategory()">
+        Cancel
+      </span>
+      <button nz-button class="btn-add-cat" (click)="submitCategory()">
+        Add category
+      </button>
+    </div>
+  </form>
+</nz-modal>

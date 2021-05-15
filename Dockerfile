@@ -1,0 +1,34 @@
+### STAGE 1: Build ###
+
+# We label our stage as 'builder'
+FROM node:12.17.0-alpine3.11 as builder
+# Set the working directory, which creates the directory.
+WORKDIR /app
+# Install dependencies.
+ADD package.json package-lock.json /tmp/
+RUN cd /tmp && npm install --unsafe-perm
+# Move the dependency directory back to the app.
+RUN mv /tmp/node_modules /app
+# Copy the content into the app directory. The previously added "node_modules"
+# directory will not be overridden.
+COPY . /app
+## Build the angular app in production mode and store the artifacts in dist folder
+ARG NG_ENV=development
+
+RUN npm run build
+
+
+### STAGE 2: Setup ###
+
+FROM nginx:1.8.1-alpine
+
+## Copy our default nginx configs
+COPY nginx/default.conf /etc/nginx/conf.d/
+
+## Remove default nginx website
+RUN rm -rf /usr/share/nginx/html/*
+
+## From 'builder' stage copy over the artifacts in dist folder to default nginx public folder
+COPY --from=builder /app/dist/tps-fe /usr/share/nginx/html
+
+CMD ["nginx", "-g", "daemon off;"]
