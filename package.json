@@ -4,10 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "prebuild": "npm run tailwind:prod",
+    "build": "ng build -c=production",
+    "tailwind:dev": "npx tailwindcss build  styles/tailwind.css -o styles/tailwind-build.dev.css",
+    "tailwind:prod": "cross-env NODE_ENV=production npx tailwindcss build  styles/tailwind.css -o styles/tailwind-build.prod.css",
+    "lint": "ng lint"
   },
   "private": true,
   "dependencies": {
