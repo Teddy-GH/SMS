@@ -1,0 +1,228 @@
+/* You can add global styles to this file, and also import other style files */
+body {
+  background: #e8ebee;
+  font-family: CirceRounded-Regular !important;
+}
+
+.ant-card-head {
+  min-height: 42px !important;
+  font-size: 12px !important;
+  background: #f7f7f7;
+}
+svg {
+  vertical-align: unset;
+}
+
+.card {
+  width: 754px;
+  height: 660px;
+}
+
+@font-face {
+  font-family: CirceRounded-Regular;
+  src: url('./assets/fonts/CirceRounded-Regular.otf');
+}
+
+.h-popover {
+  .ant-popover-inner {
+    border: 2px solid #008795;
+    border-radius: 8px;
+    padding: 1px;
+  }
+  .ant-popover-arrow {
+    border-top: 2px solid #008795 !important;
+    border-width: 2.242641px !important;
+    background: white;
+    top: 7px !important;
+    margin-top: 25.7px;
+
+    width: 18.48528137px;
+    height: 18.48528137px;
+
+    border-right-color: white !important;
+    border-bottom-color: white !important;
+    border-left: 2px solid #008795 !important;
+  }
+
+  .ant-popover-inner-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+
+    left: 1px;
+  }
+
+  .ant-popover-content {
+    padding-top: 30px;
+  }
+}
+
+.card-1 {
+  border: 1px #d1d1d1 solid;
+  box-sizing: border-box;
+  background: #fbfbfb;
+}
+
+.ant-form-item-label label {
+  color: #718096;
+}
+.ant-tabs-bar {
+  margin: 0;
+}
+.ant-table-pagination.ant-pagination {
+  padding-right: 24px;
+}
+th {
+  background-color: #fff !important;
+  color: #828d99 !important;
+}
+
+.ant-tabs-nav .ant-tabs-tab {
+  font-size: 14px;
+  line-height: 22px;
+
+  text-align: center;
+
+  color: rgba(0, 0, 0, 0.65);
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  height: 100%;
+  margin: 0 100px 0 0;
+  padding: 12px 0;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.ant-modal-content {
+  border-radius: 10px;
+}
+
+.ant-col-sm-6 {
+  display: block;
+  flex: 0 0 25%;
+  max-width: fit-content;
+}
+
+.ant-picker-input > input {
+  text-transform: lowercase;
+}
+
+.ant-upload.ant-upload-select-picture-card > .ant-upload {
+  display: table-cell;
+
+  height: 128px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.ant-upload.ant-upload-select.ant-upload-select-picture-card {
+  width: 128px;
+  margin-right: 0px;
+  margin-bottom: 0px;
+  background: #f5f5f5;
+}
+
+.ant-form-item {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+  font-variant: tabular-nums;
+  line-height: 1.5715;
+  list-style: none;
+  font-feature-settings: 'tnum';
+  vertical-align: top;
+}
+
+.ant-modal-close,
+button {
+  outline: none !important;
+  border: 0px;
+}
+
+.image-fit-div {
+  height: 100% !important;
+  width: 100% !important;
+  object-fit: cover;
+}
+.ellipse-tag {
+  padding: 6px 0px 2px 12px;
+  width: auto;
+  height: 30px;
+  left: -2px;
+  top: 1px;
+  background: rgba(56, 127, 138, 0.2);
+  border-radius: 40px;
+  margin-top: 16px;
+  font-size: 13px !important;
+  line-height: 13px;
+}
+.form-btn-orange {
+  height: 38px;
+  width: 128px;
+
+  background: #f35803;
+
+  border: 1px solid #f35803;
+  box-sizing: border-box;
+  border-radius: 4px;
+
+  font-size: 16px;
+  color: white;
+}
+.form-btn-cancel {
+  height: 38px;
+  width: 128px;
+}
+.max-height-scrollable {
+  max-height: 360px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
+  background-color: #e6fffb;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border-right: 4px solid #387f8a;
+  text-align: center;
+}
+
+.ant-menu-vertical .ant-menu-item,
+.ant-menu-vertical-left .ant-menu-item,
+.ant-menu-vertical-right .ant-menu-item,
+.ant-menu-inline .ant-menu-item,
+.ant-menu-vertical .ant-menu-submenu-title,
+.ant-menu-vertical-left .ant-menu-submenu-title,
+.ant-menu-vertical-right .ant-menu-submenu-title,
+.ant-menu-inline .ant-menu-submenu-title {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.ant-menu-vertical .ant-menu-item:not(:last-child),
+.ant-menu-vertical-left .ant-menu-item:not(:last-child),
+.ant-menu-vertical-right .ant-menu-item:not(:last-child),
+.ant-menu-inline .ant-menu-item:not(:last-child) {
+  margin-bottom: 0px;
+}
+
+.cdk-global-scrollblock {
+  position: fixed;
+  width: 100%;
+  overflow-y: auto;
+}
+@import '~slider-carousel/slider-carousel.scss';
+@include slider-carousel();
+
+.ant-tooltip-inner {
+  background-color: #000000;
+  opacity: 0.8;
+
+  margin-left: 0px;
+  margin-right: 0px;
+}

@@ -1,0 +1,210 @@
+<div class="dynamic-table-main-container bg-white" style="padding: 24px 26px 8px 26px;">
+  <div class="dynamic-table-bulk-action-top" *ngIf="isBulkActionLocationTop">
+    <ng-container *ngFor="let bulkAction of bulkActions; let i = index; trackBy: i">
+      <ng-container
+        *ngTemplateOutlet="
+          bulkAction.template ? bulkAction.template : renderBulkAction;
+          context: {
+            bulkAction: bulkAction,
+            onActionClick: bulkActionClicked
+          }
+        "
+      >
+      </ng-container>
+      <ng-template #renderBulkAction let-bulkAction="bulkAction" let-onActionClick="onActionClick">
+        <button nz-button type="button" class="inline" (click)="onActionClick(bulkAction)">{{ bulkAction.name }}</button>
+      </ng-template>
+    </ng-container>
+  </div>
+  <ng-container>
+    <div class="dynamic-table-header-container flex flex-col lg:flex-row justify-between mb-4">
+      <div class="dynamic-table-header-left dynamic-table-header-status-filter my-2 lg:my-0">
+        <ng-container *ngIf="statusFilters && showStatusFilters">
+          <ng-container *ngFor="let statusFilter of statuses; let i = index; trackBy: identityStatusFilter">
+            <nz-divider *ngIf="i !== 0" nzType="vertical" class="dynamic-table-header-status-filter-divider border-gray"></nz-divider>
+            <a
+              (click)="statusFilterClicked(statusFilter)"
+              nz-button
+              class="dynamic-table-header-status-filter-link p-0"
+              nzType="link"
+              nzSize="small"
+              [class]="statusFilter.status === activeStatus ? '' : 'text-gray'"
+              >{{ statusFilter.status | titlecase }} ({{ statusFilter.count }})</a
+            >
+          </ng-container>
+        </ng-container>
+      </div>
+      <div class="dynamic-table-header-right flex justify-end flex-col lg:flex-row" *ngIf="!isBulkActionLocationTop">
+        <div class="dynamic-table-header-search my-2 lg:my-0">
+          <nz-input-group [nzPrefix]="prefixIconSearch" *ngIf="showSearch">
+            <input
+              type="text"
+              class="dynamic-table-header-search-input"
+              style="width: 256px;"
+              nz-input
+              [(ngModel)]="searchInput"
+              (ngModelChange)="onSearch($event)"
+              placeholder="{{ searchPlaceholder }}"
+            />
+          </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <i nz-icon class="dynamic-table-header-search-input-icon" nzType="search" style="opacity: 0.55;"></i>
+          </ng-template>
+        </div>
+        <div class="dynamic-table-header-bulk-and-col-filter flex lg:justify-start mt-2 lg:my-0 justify-end">
+          <div class="dynamic-table-header-bulk lg:ml-6" *ngIf="bulkActions && bulkActions.length > 0">
+            <a
+              nz-button
+              nz-dropdown
+              nzType="default"
+              [nzClickHide]="true"
+              [nzDropdownMenu]="actionMenu"
+              class="dynamic-table-header-bulk-dropdown mb-2"
+            >
+              Bulk Actions
+              <i nz-icon nzType="down"></i>
+            </a>
+            <nz-dropdown-menu class="dynamic-table-header-bulk-dropdown-list" #actionMenu="nzDropdownMenu">
+              <ul nz-menu>
+                <ng-container *ngTemplateOutlet="recursiveBulkActionTmpl; context: { bActions: bulkActions }"></ng-container>
+
+                <ng-template #recursiveBulkActionTmpl let-bActions="bActions">
+                  <ng-template
+                    *ngFor="let action of bActions; let i = index; trackBy: identityBulkAction"
+                    [ngxPermissionsOnly]="action.permissions ? action.permissions : []"
+                  >
+                    <ng-template [ngIf]="action.children" [ngIfElse]="elseBlock">
+                      <li nz-submenu [class]="action.class ? action.class : ''" [nzTitle]="action.name">
+                        <ul *ngIf="action.children && action.children.length > 0" nz-menu>
+                          <ng-container *ngTemplateOutlet="recursiveBulkActionTmpl; context: { bActions: action.children }"></ng-container>
+                        </ul>
+                      </li>
+                    </ng-template>
+                    <ng-template #elseBlock>
+                      <li nz-menu-item (click)="action.onClick ? bulkActionClicked(action) : null">
+                        {{ action.name }}
+                      </li>
+                    </ng-template>
+                  </ng-template>
+                </ng-template>
+              </ul>
+            </nz-dropdown-menu>
+          </div>
+          <div *ngIf="showColumnSelector" class="dynamic-table-header-bulk-col-filter-divider">
+            <nz-divider style="height: 80%; margin: 0 24px;" nzType="vertical"></nz-divider>
+          </div>
+          <div *ngIf="showColumnSelector" class="dynamic-table-header-col-filter">
+            <button nz-button nz-dropdown [nzDropdownMenu]="menu" class="dynamic-table-header-col-filter-dropdown">
+              <i nz-icon nzType="filter"></i>
+            </button>
+            <nz-dropdown-menu #menu="nzDropdownMenu" class="dynamic-table-header-col-filter-dropdown-list">
+              <ul nz-menu>
+                <nz-checkbox-wrapper style="width: 100%;" (nzOnChange)="optionChanged($event)">
+                  <li nz-menu-item *ngFor="let option of options">
+                    <label nz-checkbox [nzValue]="option" [(ngModel)]="option.checked">{{ option.label }}</label>
+                  </li>
+                </nz-checkbox-wrapper>
+              </ul>
+            </nz-dropdown-menu>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <nz-table
+    #basicTable
+    class="listTable"
+    [nzData]="frontendPagination ? data : data?.content"
+    [nzPaginationPosition]="'bottom'"
+    [nzShowPagination]="true"
+    [nzFrontPagination]="frontendPagination"
+    [nzLoading]="loading"
+    nzNoResult="No Data"
+    [nzPageSize]="frontendPagination ? frontendPaginationConfig.pageSize : data?.size"
+    [nzTotal]="frontendPagination ? data?.length : data?.totalElements"
+    (nzQueryParams)="queryParamChanged($event)"
+  >
+    <thead>
+      <tr>
+        <th
+          *ngIf="bulkActions && bulkActions.length > 0"
+          [nzWidth]="'50px'"
+          [nzChecked]="checked"
+          [nzIndeterminate]="indeterminate"
+          (nzCheckedChange)="onAllChecked($event)"
+          scope="col"
+        ></th>
+        <ng-container *ngFor="let column of defaultColumns; let i = index">
+          <ng-template [ngIf]="column.sort" [ngIfElse]="elseHeaderBlock">
+            <th [nzWidth]="'150px'" scope="col" [nzSortFn]="column.sort ? true : false" [nzColumnKey]="column.key">
+              <strong>{{ column.name }}</strong>
+            </th>
+          </ng-template>
+          <ng-template #elseHeaderBlock>
+            <th [nzWidth]="'150px'" scope="col" [nzColumnKey]="column.key">
+              <strong>{{ column.name }}</strong>
+            </th>
+          </ng-template>
+        </ng-container>
+
+        <th [nzWidth]="'80px'" scope="col" *ngIf="actions && actions.length > 0">
+          <strong>{{ actionColumnName }}</strong>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of basicTable.data; trackBy: identity">
+        <td
+          *ngIf="bulkActions && bulkActions.length > 0"
+          [nzChecked]="setOfCheckedId.has(data.id)"
+          (nzCheckedChange)="onItemChecked(data.id, $event)"
+        ></td>
+        <td
+          *ngFor="let column of defaultColumns; let i = index; trackBy: i"
+          (click)="column.onClick ? column.onClick(data) : null"
+          [class]="column.onClick ? 'cursor-pointer' : ''"
+        >
+          <ng-container
+            *ngTemplateOutlet="
+              column.template ? column.template : renderColumn;
+              context: {
+                row: data,
+                column: column,
+                cell: data[column.key],
+                data: basicTable.data
+              }
+            "
+          >
+          </ng-container>
+          <ng-template #renderColumn let-column="column">
+            {{ data[column.key] ? (data[column.key] | titlecase) : nullText }}
+          </ng-template>
+        </td>
+        <ng-container *ngIf="actions && actions.length > 0">
+          <td>
+            <div class="w-full">
+              <a nz-dropdown [nzDropdownMenu]="menu" class="text-lg hover:bg-gray-300 mx-auto p-0">
+                <i nz-icon nzType="ellipsis" nzTheme="outline" [nzRotate]="90" class="my-2"></i>
+              </a>
+              <nz-dropdown-menu #menu="nzDropdownMenu">
+                <ul nz-menu nzSelectable>
+                  <ng-template
+                    *ngFor="let action of actions; let i = index; trackBy: identityAction"
+                    [ngxPermissionsOnly]="action.permissions ? action.permissions : []"
+                  >
+                    <li nz-menu-item (click)="action.onClick(data)" [class]="action.class" class="w-24 text-center">
+                      <span>
+                        <i nz-icon [nzType]="action.icon" *ngIf="action.icon" nzTheme="outline"></i>
+                        {{ action.name }}
+                      </span>
+                    </li>
+                  </ng-template>
+                </ul>
+              </nz-dropdown-menu>
+            </div>
+          </td>
+        </ng-container>
+      </tr>
+    </tbody>
+  </nz-table>
+</div>

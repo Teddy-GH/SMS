@@ -1,3 +1,4 @@
+import { DefaultLayoutComponent } from './layout/default/default-layout.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
@@ -6,7 +7,7 @@ import { AppComponent } from './app.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent, DefaultLayoutComponent
   ],
   imports: [
     BrowserModule,

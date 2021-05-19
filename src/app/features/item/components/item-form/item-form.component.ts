@@ -1,23 +1,24 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { AuthService } from '@tps/core/services/auth.service';
 import { AppRoles } from '@tps/core/src/lib/models/roles';
 import { findIndex } from 'lodash-es';
 import { NzDateMode, NzModalRef, NzModalService, NzNotificationService } from 'ng-zorro-antd';
-import { base64ToFile, ImageCroppedEvent, ImageTransform } from 'ngx-image-cropper';
+import { ImageTransform } from 'ngx-image-cropper';
 import { Subject } from 'rxjs';
+import { Item } from '../../../../models/item';
 import { environment } from './../../../../../environments/environment';
 import { Category } from './../../../../models/category';
-import { Community, CommunityZipcode } from './../../../../models/community';
+import { Community } from './../../../../models/community';
 
 @Component({
-  selector: 'tps-community-form',
-  templateUrl: './community-form.component.html',
-  styleUrls: ['./community-form.component.scss']
+  selector: 'sms-item-form',
+  templateUrl: './sms-item.component.html',
+  styleUrls: ['./sms-item.component.scss']
 })
-export class CommunityFormComponent implements OnInit, OnDestroy, OnChanges {
-  communityForm: FormGroup;
-  imageUrl: any;
+export class ItemFormComponent implements OnInit, OnDestroy, OnChanges {
+ itemForm: FormGroup;
+
   listOfCategories = new Set<Category>();
   apiUrl: string;
   confirmModal?: NzModalRef;
@@ -50,16 +51,7 @@ export class CommunityFormComponent implements OnInit, OnDestroy, OnChanges {
   isConfirmVisible = false;
   hasImage = false;
 
-  @Input() imageChangedEvent: any = '';
-  @Input() resizeToWidth = 705;
-  @Input() resizeToHeight = 116;
-  @Input() cropperMinWidth = 705;
-  @Input() cropperMinHeight = 116;
-  @Input() accept = 'image/jpeg, image/png';
-  @Input() multiple = false;
-  @Input() imagesList: string[];
-  @Input() categoryList!: Category[];
-  @Input() selectedCommunity: Community;
+
 
   checkedCategory: { [category: number]: boolean };
 
@@ -82,12 +74,9 @@ export class CommunityFormComponent implements OnInit, OnDestroy, OnChanges {
   @Output() readonly OnSubmit: EventEmitter<Community> = new EventEmitter();
   @Output() readonly OnCategoryAdded: EventEmitter<Category> = new EventEmitter();
 
-  @Input() community: Community;
-  @Input() zipcode: CommunityZipcode;
+  @Input() item: Item;
   @Input() loading: boolean;
-  @Input() selectedCommunityForEdit: Community;
-  @Input() loadingSelectedCommunity: boolean;
-  @Input() listOfZipcodes: CommunityZipcode;
+
 
   dateMode: NzDateMode = 'time';
   plainFooter = 'plain extra footer';
@@ -115,16 +104,13 @@ export class CommunityFormComponent implements OnInit, OnDestroy, OnChanges {
     this.destroy$.complete();
   }
 
-  identifyZipcode(index, item): string {
-    return index;
-  }
 
   confirmationValidator = (control: FormControl): { [s: string]: boolean } => this.confirmationValidatorValue(control);
 
   confirmationValidatorValue(control: FormControl): { [s: string]: boolean } {
     if (!control.value) {
       return { required: true };
-    } else if (control.value !== this.communityForm.controls.password.value) {
+    } else if (control.value !== this.itemForm.controls.password.value) {
       return { confirm: true, error: true };
     }
 
@@ -132,12 +118,12 @@ export class CommunityFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   submitForm(): void {
-    Object.keys(this.communityForm.controls).forEach((key) => {
-      this.markControlAsDirty(this.communityForm.get(key));
+    Object.keys(this.itemForm.controls).forEach((key) => {
+      this.markControlAsDirty(this.itemForm.get(key));
     });
-    if (this.communityForm.valid) {
-      this.communityForm.patchValue({ image: this.fileToUpload });
-      const community = this.communityForm.value;
+    if (this.itemForm.valid) {
+      this.itemForm.patchValue({ image: this.fileToUpload });
+      const item = this.itemForm.value;
       this.OnSubmit.emit({
         zipCode: community.zipcode,
         type: community.type,
@@ -158,246 +144,13 @@ export class CommunityFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit(): void {
-    this.setConditionalValidator();
   }
 
-  ngOnChanges(changes: SimpleChanges): any {
-    if (changes?.selectedCommunityForEdit) {
-      if (this.selectedCommunityForEdit?.type === 'location-based') {
-        this.resetCommunityForm();
-      }
-      if (this.selectedCommunityForEdit?.type === 'non-location-based') {
-        this.resetNonLocationBaseCommunityForm();
-      }
-      this.patchSelectedCommunity();
-    }
-    if (changes.categoryList) {
-      this.checkedCategory = changes.categoryList.currentValue?.reduce((reduced, item: Category) => {
-        const id = item.id;
-        reduced[id] = false;
+//
 
-        return reduced;
-      }, {});
-    }
-  }
-  resetCommunityForm(): void {
-    this.communityForm = this.fb.group({
-      zipcode: this.fb.control('', Validators.required),
-      name: this.fb.control(''),
-      category: this.fb.control(''),
-      type: this.fb.control(''),
-      description: this.fb.control(undefined, [this.validateDescriptionInput]),
-      image: this.fb.control(''),
-      imageUrl: this.fb.control('')
-    });
-    this.addCategoryForm = this.fb.group({
-      name: this.fb.control(undefined, [Validators.required, this.validateInput])
-    });
-  }
-  // reset Community form for non-location based
-  resetNonLocationBaseCommunityForm(): void {
-    this.communityForm = this.fb.group({
-      zipcode: this.fb.control(''),
-      name: this.fb.control(''),
-      category: this.fb.control(''),
-      type: this.fb.control(''),
-      description: this.fb.control(undefined, [this.validateDescriptionInput]),
-      image: this.fb.control(''),
-      imageUrl: this.fb.control('')
-    });
-    this.addCategoryForm = this.fb.group({
-      name: this.fb.control(undefined, [Validators.required, this.validateInput])
-    });
-  }
-  patchSelectedCommunity(): any {
-    if (this.selectedCommunityForEdit) {
-      this.selectedZipcode = `${this.selectedCommunityForEdit?.zipCode}` + '##' + `${this.selectedCommunityForEdit?.city}`;
-      if (this.selectedCommunityForEdit?.type === 'location-based') {
-        this.selectedCommunityForEdit.type = '1';
 
-        this.communityForm.patchValue({ zipcode: this.selectedZipcode });
-        this.commType = '1';
-      }
-      if (this.selectedCommunityForEdit?.type === 'non-location-based') {
-        this.selectedCommunityForEdit.type = '0';
 
-        this.communityForm.patchValue({ name: this.selectedCommunityForEdit?.name });
-        this.commType = '0';
-        this.selectedCommunityForEdit?.categories.forEach((element) => {
-          this.listOfCategories.add(element);
-        });
-        this.communityForm.patchValue({ listOfCategories: this.listOfCategories });
-      }
-      if (this.selectedCommunityForEdit?.imageUrl !== null) {
-        const tempImageUrl = this.selectedCommunityForEdit?.imageUrl.slice(1);
-        this.imageUrl = `${this.imageSrc + tempImageUrl.toString()}`;
-      }
-      this.communityForm.patchValue(this.selectedCommunityForEdit);
-    }
-  }
-  setConditionalValidator(): void {
-    const nameField = this.communityForm.get('name');
-    const zipcodeField = this.communityForm.get('zipcode');
-    const categoryField = this.communityForm.get('category');
-    this.communityForm.get('type').valueChanges.subscribe((type) => {
-      if (type === '1') {
-        nameField.setValidators([]);
-        zipcodeField.setValidators([Validators.required]);
-        categoryField.setValidators([]);
-      } else {
-        zipcodeField.setValidators([]);
-        nameField.setValidators([Validators.required, this.validateInput]);
-        categoryField.setValidators([Validators.required]);
-      }
-    });
-  }
 
-  removeImage(): any {
-    this.imageUrl = undefined;
-    this.imageChangedEvent = undefined;
-  }
-
-  confirmDeletion(index): any {
-    this.confirmModal = this.modal.confirm({
-      nzWrapClassName: 'vertical-center-modal',
-      nzTitle: 'Remove Image',
-      nzContent: 'Are you sure you want to remove this image?',
-      nzOkText: 'Remove image',
-      nzCancelText: 'Cancel',
-
-      nzOnOk: () => this.removeImage()
-    });
-  }
-
-  uploadImage(): void {
-    this.hasImage = false;
-    this.imageChangedEvent = undefined;
-    this.isUploadVisible = true;
-  }
-
-  getTabSet(index: any): void {
-    this.tabIndex = index;
-  }
-
-  zoomOut(): void {
-    this.scale -= 0.1;
-    this.transform = {
-      ...this.transform,
-      scale: this.scale
-    };
-  }
-
-  zoomIn(): void {
-    this.scale += 0.1;
-    this.transform = {
-      ...this.transform,
-      scale: this.scale
-    };
-  }
-
-  imageCropped(event: ImageCroppedEvent): void {
-    this.hasImage = true;
-    this.croppedImage = event.base64; // preview
-    const fileBeforeCrop = this.imageChangedEvent.target.files[0]; // converting for upload
-    this.fileToUpload = new File([base64ToFile(event.base64)], fileBeforeCrop.name, { type: fileBeforeCrop.type });
-    this.communityForm.patchValue({ image: this.fileToUpload });
-  }
-
-  rotateLeft(): void {
-    this.canvasRotation--;
-    this.flipAfterRotate();
-  }
-
-  rotateRight(): void {
-    this.canvasRotation++;
-    this.flipAfterRotate();
-  }
-
-  private flipAfterRotate(): void {
-    const flippedH = this.transform.flipH;
-    const flippedV = this.transform.flipV;
-    this.transform = {
-      ...this.transform,
-      flipH: flippedV,
-      flipV: flippedH
-    };
-  }
-
-  flipHorizontal(): void {
-    this.transform = {
-      ...this.transform,
-      flipH: !this.transform.flipH
-    };
-  }
-
-  flipVertical(): void {
-    this.transform = {
-      ...this.transform,
-      flipV: !this.transform.flipV
-    };
-  }
-
-  resetImage(): void {
-    this.scale = 1;
-    this.rotation = 0;
-    this.canvasRotation = 0;
-    this.transform = {};
-  }
-
-  loadImageFailed(): void {
-    this.notification.create('error', 'Error', 'Invalid file type or format!!', { nzPlacement: 'bottomLeft' });
-  }
-
-  imageLoaded(): void {
-    this.showCropper = true;
-  }
-
-  addFile(): void {
-    this.file.nativeElement.click();
-  }
-
-  fileChangeEvent(event: any): void {
-    this.imageChangedEvent = event;
-  }
-
-  addImage(): void {
-    if (this.croppedImage !== '') {
-      this.imageUrl = this.croppedImage;
-    }
-    if (this.tempImageUrl) {
-      this.hasImage = true;
-      this.imageUrl = this.imageSrc + this.imageVal;
-      this.communityForm.patchValue({ imageUrl: this.imageVal });
-      this.tempImageUrl = !this.tempImageUrl;
-    }
-    this.isUploadVisible = false;
-    this.isConfirmVisible = false;
-  }
-
-  handleCancel(): void {
-    this.hasImage = false;
-    this.imageChangedEvent = undefined;
-    this.isUploadVisible = false;
-    this.isConfirmVisible = false;
-  }
-
-  removeSelectedImage(): void {
-    const allElements = document.getElementsByClassName('image-fit-div');
-    let i = 0;
-    while (i < allElements.length) {
-      allElements[i].classList.remove('selected-image');
-      i++;
-    }
-  }
-
-  addUploadedImage(imageVal: string, index: number): void {
-    this.hasImage = true;
-    this.imageVal = imageVal;
-    this.tempImageUrl = true;
-    this.removeSelectedImage();
-    const element = document.getElementsByClassName('image-fit-div')[index];
-    element?.classList.add('selected-image');
-  }
 
   onClose(value: Category): void {
     this.listOfCategories.delete(value);
@@ -504,7 +257,5 @@ export class CommunityFormComponent implements OnInit, OnDestroy, OnChanges {
     return item.id;
   }
 
-  identifyListOfImages(index, item): number {
-    return item.id;
-  }
+
 }

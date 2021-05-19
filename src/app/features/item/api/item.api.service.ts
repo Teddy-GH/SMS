@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
@@ -16,13 +16,13 @@ export class ItemApiService {
   contentType = 'Content-Type';
   applicationType = 'application/json';
 
-//   createCategory(category: string): Observable<Category> {
-//     const headers = new HttpHeaders().set(this.contentType, this.applicationType);
-//
-//     return this.http.post<Category>(ItemEndpoints.category, category, { headers });
-//   }
+  createCategory(category: string): Observable<Category> {
+    const headers = new HttpHeaders().set(this.contentType, this.applicationType);
 
-  createCommunity(form: any): Observable<Item> {
+    return this.http.post<Category>(ItemEndpoints.category, category, { headers });
+  }
+
+  createItem(form: any): Observable<Item> {
     const formData = new FormData();
     formData.append('Name', form.name);
     formData.append('Description', form.description);
@@ -32,6 +32,14 @@ export class ItemApiService {
 
 
     return this.http.post<Item>(ItemEndpoints.create, formData);
+  }
+
+  getItemById(itemId: number): Observable<Item> {
+    return this.http.get<Item>(ItemEndpoints.getCommunityById(itemId));
+  }
+
+  getItems(): Observable<Item[]> {
+    return this.http.get<Item[]>(ItemEndpoints.itemList);
   }
 
   getAllCategories(): Observable<Category[]> {

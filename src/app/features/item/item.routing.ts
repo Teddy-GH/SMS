@@ -8,7 +8,7 @@ import { CommunityUpdateComponent } from './pages/community-update/community-upd
 import { MoreCommunitiesPageComponent } from './pages/more-communities-page/more-communities-page.component';
 
 const routes: Routes = [
-  { path: '', component: CreateCommunityComponent },
+  { path: '', component: CreateItemComponent },
   { path: 'view/:id', component: CommunityDetailComponent },
   { path: 'search', component: CommunitySearchPageComponent },
   { path: 'edit/:id', component: CommunityUpdateComponent },
@@ -19,4 +19,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class CommunityRoutingModule {}
+export class ItemRoutingModule {}

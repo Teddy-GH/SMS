@@ -1,0 +1,75 @@
+.bottom-title {
+  font-family: CirceRounded-Regular !important;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 22px;
+
+  text-align: center;
+
+  color: #718096;
+
+  flex: none;
+  order: 1;
+  align-self: center;
+  flex-grow: 0;
+  margin: 0px 1px;
+}
+
+.bottom-subtitle {
+  font-family: CirceRounded-Regular !important;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 19px;
+
+  text-align: center;
+
+  color: #2d3748;
+
+  flex: none;
+  order: 2;
+  align-self: center;
+  flex-grow: 0;
+  margin: 0px 1px;
+}
+
+.card-title {
+  position: absolute;
+  width: 99px;
+  height: 22px;
+  left: 12px;
+  top: calc(50% - 22px / 2);
+
+  font-family: CirceRounded-Regular !important;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 22px;
+
+  color: #4a5568;
+}
+
+.card-header {
+  font-family: CirceRounded-Regular !important;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 22px;
+
+  color: #4a5568;
+}
+
+.right-section {
+  position: fixed;
+  width: 174px;
+
+  padding-top: 0;
+
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 22px;
+
+  color: #1a202c;
+}

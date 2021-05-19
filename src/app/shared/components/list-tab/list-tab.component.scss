@@ -1,0 +1,144 @@
+.field-label {
+  height: 22px;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 22px;
+
+  display: flex;
+  align-items: center;
+
+  color: #718096;
+
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+  margin: 0px 2px;
+}
+
+.form-title {
+  left: 24px;
+  top: 24px;
+
+  font-style: normal;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 28px;
+
+  color: #718096;
+}
+
+.form-subtitle {
+  left: 24px;
+  top: 51px;
+
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 22px;
+
+  color: #8e8e8e;
+}
+
+.form-description {
+  left: 0%;
+  right: 0%;
+  top: 0%;
+  bottom: 0%;
+
+  background: #ffffff;
+
+  border: 1px solid #d9d9d9;
+  box-sizing: border-box;
+  border-radius: 2px;
+}
+
+.form-btn-1 {
+  flex-direction: row;
+  align-items: flex-start;
+
+  background: #f35803;
+
+  border: 1px solid #f35803;
+  box-sizing: border-box;
+  border-radius: 4px;
+
+  color: white;
+  font-family: CirceRounded-Regular !important;
+}
+
+.form-btn-2 {
+  flex-direction: row;
+  align-items: flex-start;
+
+  background: #f2f2f2;
+
+  border: 2px solid #f35803;
+  border-radius: 4px;
+
+  color: #718096;
+  font-family: CirceRounded-Regular !important;
+}
+
+.card-top {
+  width: 754px;
+  height: 285px;
+  border-radius: 4px;
+}
+
+.title {
+  font-family: CirceRounded-Regular !important;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 28px;
+  color: #718096;
+}
+
+.sub-title {
+  font-family: CirceRounded-Regular !important;
+  font-size: 14px;
+  line-height: 22px;
+  color: #8e8e8e;
+}
+
+.wrapper-card {
+  background: #fbfbfb;
+
+  border: 1px solid #d1d1d1;
+  box-sizing: border-box;
+  border-radius: 4px;
+}
+
+tbody > td {
+  color: red;
+}
+
+th {
+  font-family: CirceRounded-Regular !important;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 22px;
+  color: #828d99;
+}
+
+td {
+  font-family: CirceRounded-Regular !important;
+
+  font-size: 14px;
+  line-height: 22px;
+
+  color: #2d3748;
+}
+
+tr td:first-child {
+  font-family: CirceRounded-Regular !important;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 22px;
+  color: #3e517a;
+}

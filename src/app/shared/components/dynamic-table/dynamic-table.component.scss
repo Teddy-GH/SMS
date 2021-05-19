@@ -1,0 +1,13 @@
+.text-gray {
+  color: #8c8c8c;
+}
+
+.border-gray {
+  padding: 0;
+  background: #8c8c8c;
+}
+
+::ng-deep .listTable .ant-table-body {
+  height: 57vh !important;
+  overflow: overlay !important;
+}

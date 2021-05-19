@@ -1,63 +1,38 @@
 import { QueryParams } from '@tps/models/pagination-params';
-import { Community } from '../../../../models/community';
+import { Item } from './../../../../models/item';
 
 export class CreateCategory {
-  static readonly type = '[CommunityState] CreateCategory';
+  static readonly type = '[ItemState] CreateCategory';
   constructor(readonly category: string) {}
 }
 
-export class CreateCommunity {
-  static readonly type = '[CommunityState] CreateCommunity';
-  constructor(readonly community: Community) {}
+export class CreateItem {
+  static readonly type = '[ItemState] CreateItem';
+  constructor(readonly item: Item) {}
 }
 
 export class GetCategories {
-  static readonly type = '[CommunityState] GetCategories';
+  static readonly type = '[ItemState] GetCategories';
   constructor(readonly payload?: any) {}
 }
-export class GetCommunityZipcode {
-  static readonly type = '[CommunityState] GetCommunityZipcode';
-  constructor(public payload?: any) {}
-}
-export class GetCommunities {
-  static readonly type = '[CommunityState] GetCommunities';
-  constructor(public payload?: any) {}
-}
-export class GetLocationBasedCommunities {
-  static readonly type = '[CommunityState] GetLocationBasedCommunities';
-  constructor(public payload?: any) {}
-}
-export class GetThematicBasedCommunities {
-  static readonly type = '[CommunityState] GetThematicBasedCommunities';
-  constructor(public payload?: any) {}
-}
-export class GetCommunityImage {
-  static readonly type = '[CommunityState] GetCommunityImage';
+
+export class GetItems {
+  static readonly type = '[ItemState] GetItems';
   constructor(public payload?: any) {}
 }
 
-export class GetCommunityById {
-  static readonly type = '[CommunityState] GetCommunityById';
+export class GetItemById {
+  static readonly type = '[ItemState] GetItemById';
   constructor(readonly payload?: any) {}
 }
-export class SaveSelectedCommunity {
-  static readonly type = '[CommunityState] SaveSelectedCommunity';
-  constructor(readonly selectedCommunity: Community) {}
-}
-export class CommunityUnJoin {
-  static readonly type = '[CommunitySearchState] CommunityUnJoin';
-  constructor(readonly selectedCommunity: Community) {}
-}
-export class GetAllAttachedToCommunity {
-  static readonly type = '[CommunityState] GetAllAttachedToCommunity';
-  constructor(public payload?: any) {}
-}
-export class UpdateCommunity {
-  static readonly type = '[CommunityState] UpdateCommunity';
-  constructor(public community: Community) {}
+
+
+export class UpdateItem {
+  static readonly type = '[ItemState] UpdateItem';
+  constructor(public item: Item) {}
 }
 
-export class GetCommunitySearchList {
-  static readonly type = '[CommunityState] GetCommunitySearchList';
+export class GetItemSearchList {
+  static readonly type = '[ItemState] GetItemSearchList';
   constructor(readonly payload: QueryParams) {}
 }
